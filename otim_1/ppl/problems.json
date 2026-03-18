@@ -1,0 +1,49 @@
+
+[
+    {
+        "objetivo": "MAX",
+        "coeficientes": [30, 40],
+        "restricoes": [
+            {"coeficientes": [1, 2], "sinal": "<=", "rhs": 40},
+            {"coeficientes": [1, 0], "sinal": "<=", "rhs": 24},
+            {"coeficientes": [0, 2], "sinal": "<=", "rhs": 32},
+            
+            {"coeficientes": [1, 0], "sinal": ">=", "rhs": 0},
+            {"coeficientes": [0, 1], "sinal": ">=", "rhs": 0}
+        ]
+    },
+    {
+        "objetivo": "MAX",
+        "coeficientes": [5, 2],
+        "restricoes": [
+            {"coeficientes": [2, 1], "sinal": "<=", "rhs": 10},
+            {"coeficientes": [1, 0], "sinal": "<=", "rhs": 6},
+            {"coeficientes": [0, 1], "sinal": "<=", "rhs": 5},
+            
+            {"coeficientes": [1, 0], "sinal": ">=", "rhs": 0},
+            {"coeficientes": [0, 1], "sinal": ">=", "rhs": 0}
+        ]
+    },
+    {
+        "objetivo": "MAX",
+        "coeficientes": [3, 4],
+        "restricoes": [
+            {"coeficientes": [4, 2], "sinal": "<=", "rhs": 80},
+            {"coeficientes": [2, 5], "sinal": "<=", "rhs": 120},
+            
+            {"coeficientes": [1, 0], "sinal": ">=", "rhs": 0},
+            {"coeficientes": [0, 1], "sinal": ">=", "rhs": 0}
+        ]
+    },
+    {
+        "objetivo": "MAX",
+        "coeficientes": [2, 5],
+        "restricoes": [
+            {"coeficientes": [3, 1], "sinal": "<=", "rhs": 60},
+            {"coeficientes": [2, 2], "sinal": "<=", "rhs": 40},
+            
+            {"coeficientes": [1, 0], "sinal": ">=", "rhs": 0},
+            {"coeficientes": [0, 1], "sinal": ">=", "rhs": 0}
+        ]
+    }
+]
