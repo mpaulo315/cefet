@@ -5,13 +5,18 @@ from colorama import Fore, Style, init
 
 import sympy as sp
 from numpy import inf, isinf
-from sympy.plotting import plot_implicit
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+import numpy as np
 
 import json
 from pathlib import Path
 
 folder = Path(__file__).parent
 init(autoreset=True)
+
+X_PADDING = 20
+Y_PADDING = 20
 
 class Restricao:
     def __init__(self, 
@@ -25,6 +30,7 @@ class Restricao:
 class PPLObjetivo(str, Enum):
     MAX = "MAX"
     MIN = "MIN"
+    
 
 class PPLGrafico:
     def __init__(self, 
@@ -54,17 +60,12 @@ class PPLGrafico:
         solucoes = []
         for sistema in sistemas:
             solucoes.append(sp.solve(sistema, self.variaveis))
+        
+        self.candidates = list(filter(lambda x: isinstance(x, dict), solucoes))
 
-        return list(filter(lambda x: bool(x), solucoes))
+        return self.candidates.copy()
     
     def satisfaz_restricoes(self, solucao: dict[sp.Symbol, float]) -> bool:
-        # for var in self.variaveis:
-        #     if var not in solucao:
-        #         return False
-            
-        #     if not isinstance(solucao[var], float):
-        #         return False
-
         for restricao in self.restricoes:
             resultado = restricao["expr"].subs(solucao)
 
@@ -98,7 +99,7 @@ class PPLGrafico:
         if not isinf(self.valor_final):
             return 
 
-        for solucao in self.calcular_intersecoes():
+        for solucao in self.candidates:
             if self.satisfaz_restricoes(solucao):
                 valor = self.aplicar_funcao_objetivo(solucao)
 
@@ -115,7 +116,14 @@ class PPLGrafico:
     
     def processar(self):
         vertices = self.calcular_intersecoes()
-        for v in vertices:
+        
+        if not vertices:
+            print(f"{Fore.RED}Nenhuma interseção encontrada entre as restrições.{Style.RESET_ALL}")
+            return
+        
+        print(self.candidates)
+
+        for v in self.candidates:
             if self.satisfaz_restricoes(v):
                 valor = self.aplicar_funcao_objetivo(v)
 
@@ -150,9 +158,42 @@ class PPLGrafico:
             f"{Fore.GREEN}{Style.BRIGHT}{resultado_str}{Style.RESET_ALL}"
         )
 
+        print(
+            f"{Fore.CYAN}Candidatos:{Style.RESET_ALL}"
+            f"{Style.BRIGHT}"
+            " "
+            f"{", ".join(["(" + ",".join(str(v) for v in p.values()) + ")" for p in self.candidates])}"
+            f"{Style.RESET_ALL}"
+        )
 
 
+    def plotar_grafico(self):
+        fig = make_subplots()
 
+        x = np.linspace(0, 100, 400)
+        fig.update_xaxes(range=[min(x)-X_PADDING, max(x) + X_PADDING], zeroline=True, zerolinewidth=2, zerolinecolor='Grey')
+        
+        max_y = -inf
+        min_y = inf
+        for r in self.restricoes:
+            if r["coeficientes"][1] == 0:
+                y = np.linspace(0, 100, 400)
+                x = np.full_like(y, r["rhs"] / r["coeficientes"][0])
+            else:
+                y = (r["rhs"] - r["coeficientes"][0] * x) / r["coeficientes"][1]
+                max_y = max(max_y, max(y))
+                min_y = min(min_y, min(y))
+
+            fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name=f"{r['coeficientes'][0]}x + {r['coeficientes'][1]}y {r['sinal']} {r['rhs']}"))
+
+        fig.update_yaxes(range=[min_y - Y_PADDING, max_y + Y_PADDING], zeroline=True, zerolinewidth=2, zerolinecolor="Grey")
+
+        for c in self.candidates:
+            px, py = list(c.values())
+            print(f"Plotando ponto candidato: ({px}, {py})")
+            fig.add_trace(go.Scatter(x=[px], y=[py], mode='markers'))
+
+        fig.show()
 
     def __repr__(self):
         return (
@@ -171,4 +212,5 @@ if __name__ == "__main__":
             ppl = PPLGrafico(**p)
             ppl.processar()
             ppl.print_resultado()
+            ppl.plotar_grafico()
             print("="*50 + "\n")

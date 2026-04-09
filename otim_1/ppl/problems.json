@@ -45,5 +45,15 @@
             {"coeficientes": [1, 0], "sinal": ">=", "rhs": 0},
             {"coeficientes": [0, 1], "sinal": ">=", "rhs": 0}
         ]
+    },
+    {
+        "objetivo": "MAX",
+        "coeficientes": [50, 100],
+        "restricoes": [
+            {"coeficientes": [7, 2], "sinal": "<=", "rhs": 28},
+            {"coeficientes": [2, 12], "sinal": ">=", "rhs": 24},
+            {"coeficientes": [1, 0], "sinal": ">=", "rhs": 0},
+            {"coeficientes": [0, 1], "sinal": ">=", "rhs": 0}
+        ]
     }
 ]
