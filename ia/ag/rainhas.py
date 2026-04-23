@@ -2,33 +2,47 @@ import numpy as np
 from interfaces import AbsFactory, AbsIndividuo
 from typing import Self
 
-
-np.random.seed(42)
 class Rainha(AbsIndividuo):    
-    def __init__(self, qtd_genes: int, tx_mutacao: float = 0.1, empty: bool = False):
-        super().__init__(qtd_genes, tx_mutacao)
+    def __init__(self, qtd_genes: int, empty: bool = False):
+        super().__init__(qtd_genes)
+
         if empty:
             self._genes = np.zeros(qtd_genes)
         else:
-            self._genes = np.random.randint(0, qtd_genes, size=qtd_genes)
+            self._genes = np.random.permutation(qtd_genes)
 
     def recombinar(self, outro: AbsIndividuo) -> list[AbsIndividuo]:
-        n = len(self._genes)
-        ponto_corte = np.random.randint(1, len(self._genes) - 1)
-        filho1 = Rainha(len(self._genes), self._tx_mutacao, empty=True)
-        filho2 = Rainha(len(self._genes), self._tx_mutacao, empty=True)
+        start, end = sorted(np.random.choice(len(self._genes), 2))
+        filho1 = Rainha(len(self._genes), empty=True)
+        filho2 = Rainha(len(self._genes), empty=True)
 
-        filho1._genes = self._genes[:(n - ponto_corte)] + outro._genes[ponto_corte:]
-        filho2._genes = outro._genes[:(n - ponto_corte)] + self._genes[ponto_corte:]
+        dna1_p1 = np.take(self._genes, range(0, start), mode='wrap')
+        dna1_p2 = np.take(outro._genes, range(start, end), mode='wrap')
+        dna1_p3 = np.take(self._genes, range(end, len(self._genes)), mode='wrap')
+        filho1._genes = np.concatenate([dna1_p1, dna1_p2, dna1_p3])
+
+        dna2_p1 = np.take(outro._genes, range(0, start), mode='wrap')
+        dna2_p2 = np.take(self._genes, range(start, end), mode='wrap')
+        dna2_p3 = np.take(outro._genes, range(end, len(self._genes)), mode='wrap')
+        filho2._genes = np.concatenate([dna2_p1, dna2_p2, dna2_p3])
 
         return [filho1, filho2]
     
-    def mutar(self) -> AbsIndividuo:
-        if np.random.randint(0, 100) < self._tx_mutacao * 100:
-            pos = np.random.randint(0, len(self._genes) - 1)
-            self._genes[pos] = np.random.randint(0, len(self._genes) - 1)
+    def mutar(self, tx_mutacao: float) -> AbsIndividuo:
+        mutante = Rainha(len(self._genes), empty=True)
+        mutante._genes = self._genes.copy()
 
-        return self
+        if np.random.rand() < tx_mutacao:
+            if np.random.rand() >= 0.5:
+                #Troca genes
+                i, j = np.random.choice(len(mutante._genes), 2)
+                mutante._genes[i], mutante._genes[j] = mutante._genes[j], mutante._genes[i]
+            else:
+                # Introduz novos genes
+                pos = np.random.randint(0, len(self._genes) - 1)
+                mutante._genes[pos] = np.random.randint(0, len(self._genes) - 1)
+
+        return mutante
 
     def fitness(self) -> float:
         n = len(self._genes)
@@ -43,8 +57,8 @@ class Rainha(AbsIndividuo):
         return conflitos 
 
 class FactoryRainhas(AbsFactory):
-    def __init__(self, qtd_genes: int, tx_mutacao: float = 0.1):
+    def __init__(self, qtd_genes:    int, tx_mutacao: float):
         super().__init__(qtd_genes, tx_mutacao)
 
     def criar_individuo(self) -> Rainha:
-        return Rainha(self.qtd_genes, self.tx_mutacao)
+        return Rainha(self.qtd_genes)

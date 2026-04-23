@@ -4,18 +4,16 @@ from numpy import ndarray
 
 class AbsIndividuo(ABC):
     _genes: ndarray
-    _tx_mutacao: float 
 
-    def __init__(self, qtd_genes: int, tx_mutacao: float = 0.1):
+    def __init__(self, qtd_genes: int):
         self._genes = ndarray(qtd_genes)
-        self._tx_mutacao = tx_mutacao
 
     @abstractmethod
     def recombinar(self, outro: Self) -> list[Self]:
         pass
 
     @abstractmethod
-    def mutar(self) -> Self:
+    def mutar(self, tx_mutacao: float) -> Self:
         pass
 
     @abstractmethod
@@ -24,7 +22,7 @@ class AbsIndividuo(ABC):
 
 
 class AbsFactory(ABC):
-    def __init__(self, qtd_genes: int, tx_mutacao: float = 0.1):
+    def __init__(self, qtd_genes: int, tx_mutacao: float):
         self.qtd_genes = qtd_genes
         self.tx_mutacao = tx_mutacao
 
